@@ -1,0 +1,20 @@
+{
+  "name": "revibefit-backend",
+  "version": "1.0.0",
+  "description": "this is the backend for the revibe fit",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "author": "RevibeFit",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2"
+  }
+}
