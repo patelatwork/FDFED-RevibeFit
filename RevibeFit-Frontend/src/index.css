@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+/* RevibeFit Color Palette */
+:root {
+  --color-light-yellow: #fffff0;
+  --color-green: #3f8554;
+  --color-dark-green: #225533;
+  --color-white: #ffffff;
+}
