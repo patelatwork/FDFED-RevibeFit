@@ -154,8 +154,8 @@ const Signup = () => {
           throw new Error(data.message || 'Signup failed');
         }
 
-        // Show success message and navigate to login
-        alert('Account created successfully! Please login.');
+        // Show success message based on response and navigate to login
+        alert(data.message || 'Account created successfully! Please login.');
         navigate('/login');
       } catch (error) {
         console.error('Signup error:', error);

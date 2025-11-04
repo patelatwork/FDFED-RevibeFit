@@ -94,6 +94,28 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isApproved: {
+      type: Boolean,
+      default: function () {
+        // Fitness enthusiasts are auto-approved, trainers and lab partners need approval
+        return this.userType === USER_TYPES.FITNESS_ENTHUSIAST;
+      },
+    },
+    approvalStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: function () {
+        return this.userType === USER_TYPES.FITNESS_ENTHUSIAST ? "approved" : "pending";
+      },
+    },
+    approvedBy: {
+      type: String, // Admin email who approved
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
     refreshToken: {
       type: String,
       select: false,

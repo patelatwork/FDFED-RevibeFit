@@ -27,9 +27,11 @@ app.use(cookieParser());
 
 // Routes
 import authRoutes from "./routes/auth.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 
 // Route declarations
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

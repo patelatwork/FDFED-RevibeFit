@@ -107,7 +107,9 @@ const signup = asyncHandler(async (req, res) => {
     userData.fitnessGoal = fitnessGoal;
   } else if (userType === USER_TYPES.TRAINER) {
     userData.specialization = specialization;
-    userData.certifications = req.file.path;
+    // Store only the relative path from public folder: temp/filename.pdf
+    // req.file.filename gives just the filename, we prepend temp/
+    userData.certifications = `temp/${req.file.filename}`;
   } else if (userType === USER_TYPES.LAB_PARTNER) {
     userData.laboratoryName = laboratoryName;
     userData.laboratoryAddress = laboratoryAddress;
@@ -129,10 +131,16 @@ const signup = asyncHandler(async (req, res) => {
     );
   }
 
+  // Determine response message based on user type
+  let message = "User registered successfully";
+  if (userType === USER_TYPES.TRAINER || userType === USER_TYPES.LAB_PARTNER) {
+    message = "Registration successful! Your account is pending admin approval. You will be able to login once approved.";
+  }
+
   return res
     .status(STATUS_CODES.CREATED)
     .json(
-      new ApiResponse(STATUS_CODES.CREATED, createdUser, "User registered successfully")
+      new ApiResponse(STATUS_CODES.CREATED, createdUser, message)
     );
 });
 
@@ -163,6 +171,22 @@ const login = asyncHandler(async (req, res) => {
       STATUS_CODES.FORBIDDEN,
       "Your account has been deactivated"
     );
+  }
+
+  // Check approval status for trainers and lab partners
+  if (user.userType === USER_TYPES.TRAINER || user.userType === USER_TYPES.LAB_PARTNER) {
+    if (user.approvalStatus === "pending") {
+      throw new ApiError(
+        STATUS_CODES.FORBIDDEN,
+        "Your account is pending approval. Please wait for admin approval."
+      );
+    }
+    if (user.approvalStatus === "rejected") {
+      throw new ApiError(
+        STATUS_CODES.FORBIDDEN,
+        "Your account has been rejected. Please contact support."
+      );
+    }
   }
 
   // Compare password

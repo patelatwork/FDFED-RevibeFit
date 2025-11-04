@@ -5,7 +5,8 @@ export const USERS_COLLECTION = "users";
 export const USER_TYPES = {
   FITNESS_ENTHUSIAST: "fitness-enthusiast",
   TRAINER: "trainer",
-  LAB_PARTNER: "lab-partner"
+  LAB_PARTNER: "lab-partner",
+  ADMIN: "admin"
 };
 
 // HTTP Status Codes
