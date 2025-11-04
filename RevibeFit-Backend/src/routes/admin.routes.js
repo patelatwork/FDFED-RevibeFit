@@ -1,0 +1,21 @@
+import { Router } from "express";
+import { adminLogin, getPendingApprovals, approveUser, rejectUser, getUserStats } from "../controllers/admin.controller.js";
+
+const router = Router();
+
+// Admin login route
+router.post("/login", adminLogin);
+
+// Get pending approval requests
+router.get("/pending-approvals", getPendingApprovals);
+
+// Approve user
+router.post("/approve/:userId", approveUser);
+
+// Reject user
+router.post("/reject/:userId", rejectUser);
+
+// Get user statistics
+router.get("/stats", getUserStats);
+
+export default router;

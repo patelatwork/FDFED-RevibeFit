@@ -1,7 +1,27 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import TrainerNavbar from '../components/TrainerNavbar';
+
 const TrainerDashboard = () => {
+  const navigate = useNavigate();
+  const [trainerName, setTrainerName] = useState('Trainer');
+
+  useEffect(() => {
+    // Check if user is logged in
+    const user = localStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      const userData = JSON.parse(user);
+      setTrainerName(userData.name || 'Trainer');
+    }
+  }, [navigate]);
+
   return (
-    <div className="min-h-screen bg-[#fffff0] p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-[#fffff0]">
+      <TrainerNavbar trainerName={trainerName} />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-4xl font-bold text-[#225533] mb-6">
           Trainer Dashboard
         </h1>

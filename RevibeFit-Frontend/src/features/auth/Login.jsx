@@ -68,6 +68,10 @@ const Login = () => {
         const data = await response.json();
 
         if (!response.ok) {
+          // Show appropriate message for approval-related errors
+          if (response.status === 403) {
+            throw new Error(data.message || 'Your account is pending approval');
+          }
           throw new Error(data.message || 'Login failed');
         }
 
@@ -214,6 +218,13 @@ const Login = () => {
                 Sign Up
               </Link>
             </p>
+
+            {/* Admin Login Link */}
+            <div className="text-center pt-4 border-t border-gray-200">
+              <Link to="/admin/login" className="text-sm text-gray-500 hover:text-[#3f8554]">
+                Admin Login →
+              </Link>
+            </div>
           </form>
         </motion.div>
       </div>
