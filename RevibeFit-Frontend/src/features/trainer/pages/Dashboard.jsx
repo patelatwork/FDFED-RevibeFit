@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import TrainerNavbar from '../components/TrainerNavbar';
 
 const TrainerDashboard = () => {
@@ -25,6 +25,7 @@ const TrainerDashboard = () => {
         <h1 className="text-4xl font-bold text-[#225533] mb-6">
           Trainer Dashboard
         </h1>
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Quick Stats */}
           <div className="bg-white p-6 rounded-lg shadow">
@@ -37,10 +38,10 @@ const TrainerDashboard = () => {
             <p className="text-gray-600">View training sessions</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Content</h2>
-            <p className="text-gray-600">Create workout content</p>
-          </div>
+          <Link to="/trainer/upload-blog" className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer">
+            <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Create & Manage Blogs</h2>
+            <p className="text-gray-600">Share your knowledge</p>
+          </Link>
 
           {/* More sections */}
           <div className="bg-white p-6 rounded-lg shadow">

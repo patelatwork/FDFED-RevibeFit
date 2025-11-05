@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
 });
 
 // File filter for PDF only
-const fileFilter = (req, file, cb) => {
+const pdfFileFilter = (req, file, cb) => {
   if (file.mimetype === "application/pdf") {
     cb(null, true);
   } else {
@@ -29,9 +29,29 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// File filter for images only
+const imageFileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files (JPEG, PNG, GIF, WebP) are allowed"), false);
+  }
+};
+
+// Upload middleware for PDF files (certifications, documents)
 export const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
+  fileFilter: pdfFileFilter,
+  limits: {
+    fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB default
+  },
+});
+
+// Upload middleware for image files (thumbnails, profile pictures)
+export const uploadImage = multer({
+  storage: storage,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024, // 5MB default
   },
