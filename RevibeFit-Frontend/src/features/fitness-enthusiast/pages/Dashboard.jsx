@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FitnessEnthusiastNavbar from '../components/FitnessEnthusiastNavbar';
 
 const FitnessEnthusiastDashboard = () => {
   const navigate = useNavigate();
@@ -18,10 +17,7 @@ const FitnessEnthusiastDashboard = () => {
   }, [navigate]);
 
   return (
-    <>
-      <FitnessEnthusiastNavbar userName={userName} />
-      
-      <div className="min-h-screen bg-[#fffff0]">
+    <div className="min-h-screen bg-[#fffff0]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-4xl font-bold text-[#225533] mb-6">
             Welcome to Your Fitness Dashboard
@@ -61,7 +57,6 @@ const FitnessEnthusiastDashboard = () => {
           </div>
         </div>
       </div>
-    </>
   );
 };
 

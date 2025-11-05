@@ -28,10 +28,14 @@ app.use(cookieParser());
 // Routes
 import authRoutes from "./routes/auth.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
+import trainerRoutes from "./routes/trainer.routes.js";
+import blogRoutes from "./routes/blog.routes.js";
 
 // Route declarations
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/trainers", trainerRoutes);
+app.use("/api/blogs", blogRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {
