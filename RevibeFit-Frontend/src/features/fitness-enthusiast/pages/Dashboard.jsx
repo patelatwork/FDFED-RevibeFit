@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 const FitnessEnthusiastDashboard = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('User');
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Check if user is logged in
@@ -13,8 +15,57 @@ const FitnessEnthusiastDashboard = () => {
     } else {
       const userData = JSON.parse(user);
       setUserName(userData.name || 'User');
+      fetchBookings();
     }
   }, [navigate]);
+
+  const fetchBookings = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/lab-partners/bookings/my-bookings`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        // Filter only pending and confirmed bookings
+        const activeBookings = data.data.filter(
+          booking => booking.status === 'pending' || booking.status === 'confirmed'
+        );
+        setBookings(activeBookings);
+      }
+    } catch (err) {
+      console.error('Error fetching bookings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'confirmed':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#fffff0]">
@@ -22,6 +73,89 @@ const FitnessEnthusiastDashboard = () => {
           <h1 className="text-4xl font-bold text-[#225533] mb-6">
             Welcome to Your Fitness Dashboard
           </h1>
+          
+          {/* Lab Tests Section - Pending & Confirmed */}
+          {loading ? (
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3f8554]"></div>
+                <span className="ml-3 text-gray-600">Loading lab tests...</span>
+              </div>
+            </div>
+          ) : bookings.length > 0 ? (
+            <div className="bg-white p-6 rounded-lg shadow mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-semibold text-[#3f8554]">
+                  My Lab Tests
+                </h2>
+                <button
+                  onClick={() => navigate('/fitness-enthusiast/care')}
+                  className="text-[#3f8554] hover:text-[#225533] font-medium text-sm"
+                >
+                  View All Bookings →
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                {bookings.map((booking) => (
+                  <div
+                    key={booking._id}
+                    className="border-2 border-gray-200 rounded-lg p-4 hover:border-[#3f8554] transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-[#225533]">
+                          {booking.labPartnerId?.laboratoryName || 'Lab Partner'}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {booking.labPartnerId?.laboratoryAddress}
+                        </p>
+                      </div>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadgeClass(
+                          booking.status
+                        )}`}
+                      >
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                      </span>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4 mb-3">
+                      <div className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-[#3f8554]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span className="font-medium">{formatDate(booking.bookingDate)}</span>
+                      </div>
+                      <div className="flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-[#3f8554]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{booking.timeSlot}</span>
+                      </div>
+                    </div>
+
+                    <div className="bg-green-50 border border-green-200 rounded p-3">
+                      <h4 className="font-semibold text-[#225533] text-sm mb-2">Selected Tests:</h4>
+                      <ul className="space-y-1">
+                        {booking.selectedTests.map((test, index) => (
+                          <li key={index} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700">{test.testName}</span>
+                            <span className="font-semibold text-[#3f8554]">₹{test.price}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="border-t border-green-300 mt-2 pt-2 flex justify-between items-center">
+                        <span className="font-bold text-[#225533] text-sm">Total:</span>
+                        <span className="text-lg font-bold text-[#225533]">₹{booking.totalAmount}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Quick Stats */}
             <div className="bg-white p-6 rounded-lg shadow">
@@ -51,12 +185,13 @@ const FitnessEnthusiastDashboard = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Lab Tests</h2>
-              <p className="text-gray-600">Book health tests</p>
+              <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Community</h2>
+              <p className="text-gray-600">Connect with others</p>
             </div>
           </div>
         </div>
       </div>
+      
   );
 };
 

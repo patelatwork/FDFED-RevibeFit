@@ -84,6 +84,12 @@ const userSchema = new mongoose.Schema(
         return this.userType === USER_TYPES.LAB_PARTNER;
       },
     },
+    offeredTests: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LabTest",
+      },
+    ],
 
     // Common fields
     isVerified: {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LabPartnerNavbar from '../components/LabPartnerNavbar';
+import OfferedTestsCard from '../components/OfferedTestsCard';
 
 const LabPartnerDashboard = () => {
   const navigate = useNavigate();
@@ -25,9 +26,18 @@ const LabPartnerDashboard = () => {
         <h1 className="text-4xl font-bold text-[#225533] mb-6">
           Lab Partner Dashboard
         </h1>
+
+        {/* Offered Tests Card - Full Width */}
+        <div className="mb-6">
+          <OfferedTestsCard />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Quick Stats */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div 
+            onClick={() => navigate('/lab-partner/manage-bookings')}
+            className="bg-white p-6 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-[#3f8554]"
+          >
             <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Test Bookings</h2>
             <p className="text-gray-600">View booking requests</p>
           </div>
@@ -43,7 +53,10 @@ const LabPartnerDashboard = () => {
           </div>
 
           {/* More sections */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div 
+            onClick={() => navigate('/lab-partner/manage-tests')}
+            className="bg-white p-6 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow border-2 border-transparent hover:border-[#3f8554]"
+          >
             <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Lab Services</h2>
             <p className="text-gray-600">Manage available tests</p>
           </div>
