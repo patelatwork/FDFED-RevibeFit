@@ -455,7 +455,6 @@ const UploadBlog = () => {
                       <p className="text-gray-600 mb-2 line-clamp-2">{blog.content}</p>
                       <div className="flex gap-4 text-sm text-gray-500 mb-3">
                         <span>{formatDate(blog.createdAt)}</span>
-                        <span>{blog.views} views</span>
                         <span className={blog.isPublished ? 'text-green-600' : 'text-red-600'}>
                           {blog.isPublished ? 'Published' : 'Unpublished'}
                         </span>

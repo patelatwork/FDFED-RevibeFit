@@ -173,6 +173,14 @@ const login = asyncHandler(async (req, res) => {
     );
   }
 
+  // Check if user is suspended
+  if (user.isSuspended) {
+    throw new ApiError(
+      STATUS_CODES.FORBIDDEN,
+      `Your account has been suspended. Reason: ${user.suspensionReason || 'No reason provided'}`
+    );
+  }
+
   // Check approval status for trainers and lab partners
   if (user.userType === USER_TYPES.TRAINER || user.userType === USER_TYPES.LAB_PARTNER) {
     if (user.approvalStatus === "pending") {

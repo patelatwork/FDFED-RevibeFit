@@ -32,10 +32,6 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    views: {
-      type: Number,
-      default: 0,
-    },
     isPublished: {
       type: Boolean,
       default: true,

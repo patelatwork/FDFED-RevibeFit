@@ -7,9 +7,12 @@ const BlogDetail = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isRead, setIsRead] = useState(false);
+  const [markingAsRead, setMarkingAsRead] = useState(false);
 
   useEffect(() => {
     fetchBlogDetail();
+    checkReadStatus();
   }, [id]);
 
   const fetchBlogDetail = async () => {
@@ -34,6 +37,70 @@ const BlogDetail = () => {
       setError('Unable to load blog. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkReadStatus = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const user = localStorage.getItem('user');
+      
+      if (!token || !user) return;
+      
+      const userData = JSON.parse(user);
+      if (userData.userType !== 'fitness-enthusiast') return;
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/blogs/${id}/read-status`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsRead(data.data.hasRead);
+      }
+    } catch (err) {
+      console.error('Error checking read status:', err);
+    }
+  };
+
+  const handleMarkAsRead = async () => {
+    try {
+      setMarkingAsRead(true);
+      const token = localStorage.getItem('accessToken');
+      
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      console.log('Marking blog as read:', id);
+      console.log('API URL:', `${apiUrl}/api/blogs/${id}/mark-read`);
+      
+      const response = await fetch(`${apiUrl}/api/blogs/${id}/mark-read`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
+      
+      if (response.ok) {
+        setIsRead(true);
+        console.log('Blog marked as read successfully');
+      } else {
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
+      }
+    } catch (err) {
+      console.error('Error marking blog as read:', err);
+    } finally {
+      setMarkingAsRead(false);
     }
   };
 
@@ -118,7 +185,6 @@ const BlogDetail = () => {
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-600">{formatDate(blog.createdAt)}</p>
-            <p className="text-sm text-gray-600">{blog.views} views</p>
           </div>
         </div>
 
@@ -142,6 +208,39 @@ const BlogDetail = () => {
             {blog.content}
           </div>
         </div>
+
+        {/* Mark as Read Button - Only for fitness enthusiasts */}
+        {(() => {
+          const user = localStorage.getItem('user');
+          if (user) {
+            const userData = JSON.parse(user);
+            if (userData.userType === 'fitness-enthusiast') {
+              return (
+                <div className="mt-8 pt-6 border-t-2 border-gray-200">
+                  {isRead ? (
+                    <div className="flex items-center justify-center bg-green-100 border border-green-400 text-green-700 px-6 py-4 rounded-lg">
+                      <svg className="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-semibold">Completed Reading</span>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <button
+                        onClick={handleMarkAsRead}
+                        disabled={markingAsRead}
+                        className="px-8 py-4 bg-[#3f8554] text-white rounded-lg hover:bg-[#225533] transition-colors duration-200 font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        {markingAsRead ? 'Marking as Read...' : 'Mark as Completed Reading'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            }
+          }
+          return null;
+        })()}
 
         {/* Share Section */}
         <div className="mt-12 pt-8 border-t-2 border-gray-200">

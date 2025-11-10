@@ -6,6 +6,9 @@ import {
   getTrainerBlogs,
   updateBlog,
   deleteBlog,
+  markBlogAsRead,
+  getUserReadBlogs,
+  getBlogReadStatus,
 } from "../controllers/blog.controller.js";
 import { verifyJWT, verifyUserType } from "../middlewares/auth.middleware.js";
 import { uploadImage } from "../middlewares/multer.middleware.js";
@@ -15,7 +18,27 @@ const router = Router();
 
 // Public routes
 router.route("/").get(getAllBlogs);
+
+// Protected routes - Fitness Enthusiast (must come before /:id routes)
+router.route("/read-blogs").get(
+  verifyJWT,
+  verifyUserType(USER_TYPES.FITNESS_ENTHUSIAST),
+  getUserReadBlogs
+);
+
 router.route("/:id").get(getBlogById);
+
+router.route("/:id/mark-read").post(
+  verifyJWT,
+  verifyUserType(USER_TYPES.FITNESS_ENTHUSIAST),
+  markBlogAsRead
+);
+
+router.route("/:id/read-status").get(
+  verifyJWT,
+  verifyUserType(USER_TYPES.FITNESS_ENTHUSIAST),
+  getBlogReadStatus
+);
 
 // Protected routes - Trainer only
 router.route("/").post(

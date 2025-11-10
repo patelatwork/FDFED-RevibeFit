@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const FitnessEnthusiastDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userName, setUserName] = useState('User');
   const [bookings, setBookings] = useState([]);
+  const [readBlogs, setReadBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [blogsLoading, setBlogsLoading] = useState(false);
 
   useEffect(() => {
     // Check if user is logged in
@@ -16,8 +19,67 @@ const FitnessEnthusiastDashboard = () => {
       const userData = JSON.parse(user);
       setUserName(userData.name || 'User');
       fetchBookings();
+      fetchReadBlogs();
     }
   }, [navigate]);
+
+  // Refresh blogs when the page gains focus (when user comes back from blog detail)
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchReadBlogs();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
+
+  // Also refresh blogs when returning to dashboard route
+  useEffect(() => {
+    if (location.pathname === '/fitness-enthusiast/dashboard') {
+      fetchReadBlogs();
+    }
+  }, [location.pathname]);
+
+  const fetchReadBlogs = async () => {
+    try {
+      setBlogsLoading(true);
+      const token = localStorage.getItem('accessToken');
+      console.log('Fetching read blogs...');
+      
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/blogs/read-blogs`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('Read blogs response status:', response.status);
+      console.log('Read blogs response ok:', response.ok);
+      
+      const data = await response.json();
+      console.log('Read blogs data:', data);
+      
+      if (data.success) {
+        setReadBlogs(data.data.slice(0, 3)); // Show only last 3 for dashboard
+        console.log('Read blogs set:', data.data.slice(0, 3));
+      }
+    } catch (err) {
+      console.error('Error fetching read blogs:', err);
+    } finally {
+      setBlogsLoading(false);
+    }
+  };
+
+  const formatBlogDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  };
 
   const fetchBookings = async () => {
     try {
@@ -185,8 +247,52 @@ const FitnessEnthusiastDashboard = () => {
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold text-[#3f8554] mb-4">Community</h2>
-              <p className="text-gray-600">Connect with others</p>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-[#3f8554]">My Read Blogs</h2>
+                <button
+                  onClick={() => navigate('/fitness-enthusiast/read-blogs')}
+                  className="text-[#3f8554] hover:text-[#225533] font-medium text-sm"
+                >
+                  View All →
+                </button>
+              </div>
+              
+              {blogsLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#3f8554]"></div>
+                  <span className="ml-2 text-gray-600 text-sm">Loading...</span>
+                </div>
+              ) : readBlogs.length > 0 ? (
+                <div className="space-y-3">
+                  {readBlogs.map((blogReading) => (
+                    <div
+                      key={blogReading._id}
+                      className="border border-gray-200 rounded-lg p-3 hover:border-[#3f8554] transition-colors cursor-pointer"
+                      onClick={() => navigate(`/blog/${blogReading.blogId._id}`)}
+                    >
+                      <h3 className="font-semibold text-[#225533] text-sm mb-1 line-clamp-2">
+                        {blogReading.blogId.title}
+                      </h3>
+                      <div className="flex justify-between items-center text-xs text-gray-600">
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                          ✓ Completed
+                        </span>
+                        <span>Read on {formatBlogDate(blogReading.readAt)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-sm mb-2">No blogs read yet</p>
+                  <button
+                    onClick={() => navigate('/blog')}
+                    className="text-[#3f8554] hover:text-[#225533] font-medium text-sm"
+                  >
+                    Browse Blogs →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
