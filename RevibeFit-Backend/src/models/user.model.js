@@ -100,6 +100,18 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
+    suspensionReason: {
+      type: String,
+      default: null,
+    },
+    suspendedAt: {
+      type: Date,
+      default: null,
+    },
     isApproved: {
       type: Boolean,
       default: function () {

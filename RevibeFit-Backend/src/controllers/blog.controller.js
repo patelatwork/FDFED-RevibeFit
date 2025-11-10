@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Blog } from "../models/blog.model.js";
+import { BlogReading } from "../models/blogReading.model.js";
 import { User } from "../models/user.model.js";
 import { USER_TYPES } from "../constants.js";
 import path from "path";
@@ -83,10 +84,6 @@ export const getBlogById = asyncHandler(async (req, res) => {
   if (!blog || !blog.isPublished) {
     throw new ApiError(404, "Blog post not found");
   }
-
-  // Increment view count
-  blog.views += 1;
-  await blog.save();
 
   return res.status(200).json(
     new ApiResponse(200, blog, "Blog retrieved successfully")
@@ -173,5 +170,96 @@ export const deleteBlog = asyncHandler(async (req, res) => {
 
   return res.status(200).json(
     new ApiResponse(200, null, "Blog post deleted successfully")
+  );
+});
+
+/**
+ * @desc    Mark blog as read by user
+ * @route   POST /api/blogs/:id/mark-read
+ * @access  Private (Fitness Enthusiast)
+ */
+export const markBlogAsRead = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  // Check if blog exists
+  const blog = await Blog.findById(id);
+  if (!blog || !blog.isPublished) {
+    throw new ApiError(404, "Blog post not found");
+  }
+
+  // Check if already marked as read
+  const existingReading = await BlogReading.findOne({
+    user: userId,
+    blogId: id,
+  });
+
+  if (existingReading) {
+    return res.status(200).json(
+      new ApiResponse(200, existingReading, "Blog already marked as read")
+    );
+  }
+
+  // Mark as read
+  const blogReading = await BlogReading.create({
+    user: userId,
+    blogId: id,
+  });
+
+  return res.status(201).json(
+    new ApiResponse(201, blogReading, "Blog marked as read successfully")
+  );
+});
+
+/**
+ * @desc    Get user's read blogs
+ * @route   GET /api/blogs/user/read-blogs
+ * @access  Private (Fitness Enthusiast)
+ */
+export const getUserReadBlogs = asyncHandler(async (req, res) => {
+  console.log('getUserReadBlogs endpoint hit');
+  console.log('User from request:', req.user);
+  
+  const userId = req.user._id;
+  console.log('Searching for blogs read by user:', userId);
+
+  const readBlogs = await BlogReading.find({ user: userId })
+    .populate({
+      path: "blogId",
+      populate: {
+        path: "author",
+        select: "name specialization"
+      }
+    })
+    .sort({ readAt: -1 });
+
+  console.log('Raw readBlogs found:', readBlogs.length);
+
+  // Filter out any null blogs (in case blog was deleted)
+  const validReadBlogs = readBlogs.filter(reading => reading.blogId);
+  
+  console.log('Valid readBlogs after filtering:', validReadBlogs.length);
+
+  return res.status(200).json(
+    new ApiResponse(200, validReadBlogs, "Read blogs retrieved successfully")
+  );
+});
+
+/**
+ * @desc    Check if user has read a specific blog
+ * @route   GET /api/blogs/:id/read-status
+ * @access  Private (Fitness Enthusiast)
+ */
+export const getBlogReadStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const reading = await BlogReading.findOne({
+    user: userId,
+    blogId: id,
+  });
+
+  return res.status(200).json(
+    new ApiResponse(200, { hasRead: !!reading, readAt: reading?.readAt }, "Read status retrieved")
   );
 });

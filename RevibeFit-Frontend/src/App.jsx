@@ -10,6 +10,7 @@ import FitnessEnthusiastNavbar from './features/fitness-enthusiast/components/Fi
 import Trainers from './features/fitness-enthusiast/pages/Trainers'
 import Blog from './features/fitness-enthusiast/pages/Blog'
 import BlogDetail from './features/fitness-enthusiast/pages/BlogDetail'
+import ReadBlogs from './features/fitness-enthusiast/pages/ReadBlogs'
 import Care from './features/fitness-enthusiast/pages/Care'
 import FitnessEnthusiastCare from './features/fitness-enthusiast/pages/FitnessEnthusiastCare'
 import MyBookings from './features/fitness-enthusiast/pages/MyBookings'
@@ -112,6 +113,7 @@ function App() {
                 <Route path="/trainers" element={<Trainers />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:id" element={<BlogDetail />} />
+                <Route path="/fitness-enthusiast/read-blogs" element={<ReadBlogs />} />
                 <Route path="/care" element={<Care />} />
                 <Route path="/my-bookings" element={<MyBookings />} />
                 <Route path="/classes" element={<div className="min-h-screen bg-[#fffff0] py-20 text-center"><h1 className="text-4xl font-bold text-[#225533]">Classes - Coming Soon</h1></div>} />

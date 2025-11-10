@@ -31,6 +31,11 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
       throw new ApiError(403, "Your account has been deactivated");
     }
 
+    // Check if user is suspended
+    if (user.isSuspended) {
+      throw new ApiError(403, `Your account has been suspended. Reason: ${user.suspensionReason}`);
+    }
+
     // Attach user to request object
     req.user = user;
     next();
